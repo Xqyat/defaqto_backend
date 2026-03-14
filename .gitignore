@@ -1,0 +1,20 @@
+# Backend зависимости
+node_modules/
+
+# Сборка
+dist/
+build/
+
+# База данных
+*.db
+*.sqlite
+
+# Логи
+*.log
+logs/
+
+# Тесты
+coverage/
+
+# Окружение
+.env
