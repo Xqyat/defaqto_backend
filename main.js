@@ -2,6 +2,9 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = 'defaqto-super-secret-2026';
 
 const app = express()
 
@@ -125,6 +128,69 @@ app.get('/api/events', async (req, res) => {
     time: event.time,
     entrance: event.entrance
   })));
+});
+
+const authMiddleware = async (req, res, next) => {
+  try {
+    const token = req.get('Authorization')?.replace('Bearer ', '') || 
+                req.headers['authorization']?.replace('Bearer ', '');
+
+    console.log('Токен:', token ? token.slice(0, 20) + '...' : 'отсутствует');
+
+    if (!token) return res.status(401).json({ error: 'Токен обязателен' });
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    console.log('DECODED payload:', decoded);
+    const allAdmins = await adminSchema.find({}, '_id login');
+    console.log('Все админы в БД>:', allAdmins.map(a => a._id.toString()));
+    const admin = await adminSchema.findById(decoded.userId).select('-password');
+    console.log('Ищем ID:', decoded.userId, ' найден:', !!admin);
+    if (!admin) return res.status(401).json({ error: 'Админ не найден' });
+    
+    req.admin = admin;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Неверный токен' });
+  }
+};
+
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { login, password } = req.body;
+    console.log('Входяший LOGIN:', login);
+  console.log('Входяший PASSWORD:', password);
+
+console.log('Все админы:', await adminSchema.find({}, 'login'));
+    
+    const admin = await adminSchema.findOne({ login });
+
+    console.log('Админ из БД:', admin ? admin.login : 'не найден');
+
+    if (!admin) return res.status(401).json({ error: 'Неверный логин' });
+
+    console.log('Проверка пароля:', admin.password, '==', password);
+
+    if (admin.password !== password) {
+      return res.status(401).json({ error: 'Неверный пароль' });
+    }
+
+    const token = jwt.sign({ userId: admin._id.toString() }, JWT_SECRET, { expiresIn: '24h' });
+
+    res.json({
+      token,
+      admin: { id: admin._id, login: admin.login }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+app.get('/api/admin/protected', authMiddleware, (req, res) => {
+  res.json({ 
+    message: 'Успех!', 
+    admin: req.admin 
+  });
 });
 
 app.listen(3001, () => console.log('Backend is working: localhost:3001'))
