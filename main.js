@@ -14,6 +14,22 @@ mongoose.connect('mongodb://localhost:27017/defaqto_server')
   .then(() => console.log('MongoDB connected!'))
   .catch(err => console.log('MongoDB is not connected with error:', err))
 
+
+const adminSchema = mongoose.model('admins', new mongoose.Schema({
+  login: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    maxlength: 50
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 3
+  }
+}, { timestamps: true }));
+
 const menuItemSchema = mongoose.model('menu_items', new mongoose.Schema({
   name: {
     type: String,
@@ -74,7 +90,6 @@ const eventSchema = mongoose.model('events', new mongoose.Schema({
 }, {
   timestamps: true  
   }))
-
 
 app.get('/api/menu', async (req, res) => {
   const data = await menuItemSchema .find()
