@@ -2,9 +2,10 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const path = require('path');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'defaqto-super-secret-2026';
+
+const { Types: { ObjectId } } = require('mongoose');
 
 const app = express()
 
@@ -46,9 +47,15 @@ const menuItemSchema = mongoose.model('menu_items', new mongoose.Schema({
     min: 0,
     get: v => Math.round(v * 100) / 100
   },
-  weight: {
+  weight_value: {
+    type: Number,
+    required: false,   
+    min: 0,
+  },
+  weight_unit: {
     type: String,
-    required: true
+    required: false,
+    enum: ['г', 'мл', 'л', 'шт'],
   },
   category: {
     type: String,
@@ -111,7 +118,8 @@ app.get('/api/menu', async (req, res) => {
       id: item._id,
       name: item.name,
       price: item.price,
-      weight: item.weight || '100г'
+      weight_value: item.weight_value ?? null,
+      weight_unit: item.weight_unit ?? null
     })
   })
   res.json(result)
@@ -193,4 +201,94 @@ app.get('/api/admin/protected', authMiddleware, (req, res) => {
   });
 });
 
+
+// CRUD-операции
+
+app.post('/api/admin/menu', authMiddleware, async (req, res) => {
+  try {
+    const { name, price, weight_value, weight_unit, category, group } = req.body;
+
+    if (!name || !price || !category || !group) {
+      return res.status(400).json({ error: 'Все поля обязательны к заполенению' });
+    }
+
+    const itemData = ({
+      name: name.trim(),
+      price: Number(price),
+      weight_value: weight_value ? Number(weight_value) : null,
+      weight_unit: weight_unit === '' ? null : weight_unit,
+      category: category.trim(),
+      group,
+    });
+    const item = await menuItemSchema.create(itemData);
+    res.status(201).json(item);
+  } catch (err) {
+    console.error('Ошибка создания позиции:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+app.delete('/api/admin/menu/:id', authMiddleware, async (req, res) => {
+  try {
+    const ObjectId = require('mongoose').Types.ObjectId;
+    const id = new ObjectId(req.params.id);
+
+    console.log('Удаляем ID:', id);
+    
+    console.log('Все ID в БД:');
+    const allItems = await menuItemSchema.find({}, '_id');
+    console.log(allItems.map(i => i._id.toString()));
+
+    const deleted = await menuItemSchema.findByIdAndDelete(id);
+
+    
+    
+    if (!deleted) {
+      console.log('Не найдено:', id);
+      return res.status(404).json({ error: 'Позиция не найдена' });
+    }
+    
+    console.log('Удалено:', deleted.name);
+    res.json({ message: 'Удалено успешно', id: deleted._id });
+  } catch (err) {
+    console.error('Ошибка удаления:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+
+app.put('/api/admin/menu/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, price, weight_value, weight_unit, category, group } = req.body;
+
+    if (!name || !price || !category || !group) {
+      return res.status(400).json({ error: 'name, price, category, group обязательны' });
+    }
+
+    const updated = await menuItemSchema.findByIdAndUpdate(
+      id,
+      {
+        name: name.trim(),
+        price: Number(price),
+        weight_value: weight_value ? Number(weight_value) : null,
+        weight_unit: weight_unit || null,
+        category: category.trim(),
+        group,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Позиция не найдена' });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error('Ошибка редактирования:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
 app.listen(3001, () => console.log('Backend is working: localhost:3001'))
+
