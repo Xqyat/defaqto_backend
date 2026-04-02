@@ -1,0 +1,20 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const path = require('path');
+
+const app = express();
+
+app.use(express.json());
+app.use(cors());
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+app.use('/api', require('./routes/publicRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
+
+mongoose
+  .connect('mongodb://localhost:27017/defaqto_server')
+  .then(() => console.log('MongoDB connected!'))
+  .catch(err => console.log('MongoDB is not connected with error:', err));
+
+app.listen(3001, () => console.log('Backend is working: localhost:3001'));
