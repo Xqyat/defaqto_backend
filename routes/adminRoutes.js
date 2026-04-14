@@ -15,6 +15,7 @@ const {
 } = require('../controllers/categoryController');
 
 const {
+    // getMenuItem,
     createMenuItem,
     updateMenuItem,
     deleteMenuItem
@@ -59,6 +60,8 @@ router.get('/protected', authMiddleware, (req, res) => {
   });
 });
 
+
+// router.get('/menu', authMiddleware, getMenuItem);
 router.post('/menu', authMiddleware, createMenuItem);
 router.put('/menu/:id', authMiddleware, updateMenuItem);
 router.delete('/menu/:id', authMiddleware, deleteMenuItem);

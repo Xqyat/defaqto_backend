@@ -23,16 +23,10 @@ const menuItemSchema = new mongoose.Schema(
       required: false,
       enum: ['г', 'мл', 'л', 'шт'],
     },
-    category: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 50,
-    },
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
-      default: null,
+      required: true,
     },
     group: {
       type: String,

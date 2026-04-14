@@ -3,33 +3,31 @@ const router = express.Router();
 
 const MenuItem = require('../models/MenuItem');
 const Event = require('../models/Event');
+const Category = require('../models/Category');
+
+router.get('/categories', async (req, res) => {
+  try {
+    const categories = await Category.find().sort({ createdAt: 1 });
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
 
 router.get('/menu', async (req, res) => {
-  const data = await MenuItem.find();
+  try {
+    const { categoryId } = req.query;
 
-  const result = {
-    food: {},
-    drinks: {},
-  };
-
-  data.forEach(item => {
-    const groupData = item.group === 'food' ? result.food : result.drinks;
-    const category = item.category || 'other';
-
-    if (!groupData[category]) {
-      groupData[category] = { title: category, items: [] };
+    if (categoryId) {
+      const items = await MenuItem.find({ categoryId }).sort({ createdAt: 1 });
+      return res.json(items);
     }
 
-    groupData[category].items.push({
-      id: item._id,
-      name: item.name,
-      price: item.price,
-      weight_value: item.weight_value ?? null,
-      weight_unit: item.weight_unit ?? null,
-    });
-  });
-
-  res.json(result);
+    return res.json([]);
+  } catch (err) {
+    console.error('Ошибка получения меню:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
 });
 
 router.get('/events', async (req, res) => {

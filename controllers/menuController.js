@@ -1,10 +1,17 @@
 const MenuItem = require('../models/MenuItem');
+const Category = require('../models/Category');
 
 const createMenuItem = async (req, res) => {
   try {
-    const { name, price, weight_value, weight_unit, category, group } = req.body;
-    if (!name || !price || !category || !group) {
-      return res.status(400).json({ error: 'Все поля обязательны' });
+    const { name, price, weight_value, weight_unit, categoryId } = req.body;
+
+    if (!name || !price || !categoryId) {
+      return res.status(400).json({ error: 'name, price, categoryId обязательны' });
+    }
+
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(400).json({ error: 'Категория не найдена' });
     }
 
     const itemData = {
@@ -12,8 +19,8 @@ const createMenuItem = async (req, res) => {
       price: Number(price),
       weight_value: weight_value ? Number(weight_value) : null,
       weight_unit: weight_unit === '' ? null : weight_unit,
-      category: category.trim(),
-      group,
+      categoryId, 
+      group: category.group
     };
 
     const item = await MenuItem.create(itemData);
@@ -25,14 +32,17 @@ const createMenuItem = async (req, res) => {
 };
 
 const updateMenuItem = async (req, res) => {
-  console.log('PUT controller сработал', req.params.id);
-  
   try {
     const { id } = req.params;
-    const { name, price, weight_value, weight_unit, category, group } = req.body;
+    const { name, price, weight_value, weight_unit, categoryId } = req.body;
 
-    if (!name || !price || !category || !group) {
-      return res.status(400).json({ error: 'name, price, category, group обязательны' });
+    if (!name || !price || !categoryId) {
+      return res.status(400).json({ error: 'name, price, categoryId обязательны' });
+    }
+
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(400).json({ error: 'Категория не найдена' });
     }
 
     const updated = await MenuItem.findByIdAndUpdate(
@@ -41,9 +51,9 @@ const updateMenuItem = async (req, res) => {
         name: name.trim(),
         price: Number(price),
         weight_value: weight_value ? Number(weight_value) : null,
-        weight_unit: weight_unit || null,
-        category: category.trim(),
-        group,
+        weight_unit: weight_unit === '' ? null : weight_unit,
+        categoryId, 
+        group: category.group
       },
       { new: true, runValidators: true }
     );
@@ -76,6 +86,7 @@ const deleteMenuItem = async (req, res) => {
 };
 
 module.exports = {
+  // getMenuItem,
   createMenuItem,
   updateMenuItem,
   deleteMenuItem
