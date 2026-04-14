@@ -8,6 +8,13 @@ const authMiddleware = require('../middleware/auth');
 const JWT_SECRET = 'defaqto-super-secret-2026';
 
 const {
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory
+} = require('../controllers/categoryController');
+
+const {
     createMenuItem,
     updateMenuItem,
     deleteMenuItem
@@ -55,5 +62,11 @@ router.get('/protected', authMiddleware, (req, res) => {
 router.post('/menu', authMiddleware, createMenuItem);
 router.put('/menu/:id', authMiddleware, updateMenuItem);
 router.delete('/menu/:id', authMiddleware, deleteMenuItem);
+
+router.get('/categories', authMiddleware, getCategories);
+router.post('/categories', authMiddleware, createCategory);
+router.put('/categories/:id', authMiddleware, updateCategory);
+router.delete('/categories/:id', authMiddleware, deleteCategory);
+
 
 module.exports = router;

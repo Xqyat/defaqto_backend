@@ -12,7 +12,6 @@ const menuItemSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
-      get: v => Math.round(v * 100) / 100,
     },
     weight_value: {
       type: Number,
@@ -29,6 +28,11 @@ const menuItemSchema = new mongoose.Schema(
       required: true,
       trim: true,
       maxlength: 50,
+    },
+    categoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      default: null,
     },
     group: {
       type: String,
