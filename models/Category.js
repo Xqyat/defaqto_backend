@@ -60,23 +60,20 @@ const categorySchema = new mongoose.Schema(
   }
 );
 
-categorySchema.pre('validate', async function (next) {
-  if (!this.name) return next();
-
+categorySchema.pre('validate', async function () {
+  if (!this.name) return;
   this.slug = await generateUniqueSlug(this.constructor, this.name, this._id);
-  next();
 });
 
-categorySchema.pre('findOneAndUpdate', async function (next) {
+categorySchema.pre('findOneAndUpdate', async function () {
   const update = this.getUpdate();
-
-  if (!update) return next();
+  if (!update) return;
 
   const nextName = update.name || (update.$set && update.$set.name);
-  if (!nextName) return next();
+  if (!nextName) return;
 
   const currentDoc = await this.model.findOne(this.getQuery()).select('_id');
-  if (!currentDoc) return next();
+  if (!currentDoc) return;
 
   const newSlug = await generateUniqueSlug(this.model, nextName, currentDoc._id);
 
@@ -85,8 +82,6 @@ categorySchema.pre('findOneAndUpdate', async function (next) {
   } else {
     update.slug = newSlug;
   }
-
-  next();
 });
 
 module.exports = mongoose.model('Category', categorySchema);

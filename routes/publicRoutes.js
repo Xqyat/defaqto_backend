@@ -23,12 +23,34 @@ router.get('/menu', async (req, res) => {
       return res.json(items);
     }
 
-    return res.json([]);
+    const categories = await Category.find({ isActive: true }).sort({ order: 1, createdAt: 1 });
+    const items = await MenuItem.find().sort({ createdAt: 1 });
+
+    const result = {
+      food: {},
+      drinks: {},
+    };
+
+    categories.forEach((category) => {
+      const sectionKey = category.slug || String(category._id);
+
+      const categoryItems = items.filter(
+        (item) => String(item.categoryId) === String(category._id)
+      );
+
+      result[category.group][sectionKey] = {
+        title: category.name,
+        items: categoryItems,
+      };
+    });
+
+    return res.json(result);
   } catch (err) {
     console.error('Ошибка получения меню:', err);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 });
+
 
 router.get('/events', async (req, res) => {
   const data = await Event.find();
