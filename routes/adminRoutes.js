@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const uploadEventImage = require('../middleware/uploadEventImage');
 
 const Admin = require('../models/Admin');
 const authMiddleware = require('../middleware/auth');
@@ -15,11 +16,16 @@ const {
 } = require('../controllers/categoryController');
 
 const {
-    // getMenuItem,
-    createMenuItem,
-    updateMenuItem,
-    deleteMenuItem
-  } = require('../controllers/menuController');
+  createMenuItem,
+  updateMenuItem,
+  deleteMenuItem
+} = require('../controllers/menuController');
+
+const {
+  createEvent,
+  updateEvent,
+  deleteEvent
+} = require('../controllers/eventController');
 
 router.post('/login', async (req, res) => {
   try {
@@ -70,6 +76,10 @@ router.get('/categories', authMiddleware, getCategories);
 router.post('/categories', authMiddleware, createCategory);
 router.put('/categories/:id', authMiddleware, updateCategory);
 router.delete('/categories/:id', authMiddleware, deleteCategory);
+
+router.post('/events', authMiddleware, uploadEventImage.single('image'), createEvent);
+router.put('/events/:id', authMiddleware, uploadEventImage.single('image'), updateEvent);
+router.delete('/events/:id', authMiddleware, deleteEvent);
 
 
 module.exports = router;

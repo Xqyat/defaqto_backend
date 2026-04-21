@@ -60,9 +60,10 @@ router.get('/events', async (req, res) => {
       img: event.img,
       name: event.name,
       description: event.description,
-      date: event.date,
+      date: event.date.toISOString().split('T')[0],
       time: event.time,
-      entrance: event.entrance,
+      entranceType: event.entranceType,
+      entrancePrice: event.entrancePrice,
     }))
   );
 });
