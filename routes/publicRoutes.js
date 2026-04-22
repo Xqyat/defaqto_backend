@@ -4,6 +4,8 @@ const router = express.Router();
 const MenuItem = require('../models/MenuItem');
 const Event = require('../models/Event');
 const Category = require('../models/Category');
+const { sendBookingRequest } = require('../controllers/bookingController');
+
 
 router.get('/categories', async (req, res) => {
   try {
@@ -67,5 +69,7 @@ router.get('/events', async (req, res) => {
     }))
   );
 });
+
+router.post('/booking', sendBookingRequest);
 
 module.exports = router;
