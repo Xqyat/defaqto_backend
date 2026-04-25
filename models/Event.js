@@ -26,6 +26,20 @@ const eventSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    endDate: {
+      type: Date,
+      required: true,
+    },
+    endTime: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    expiresAt: {
+      type: Date,
+      required: true,
+      expires: 0,
+    },
     entranceType: {
       type: String,
       required: true,

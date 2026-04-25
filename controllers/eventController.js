@@ -2,15 +2,33 @@ const Event = require('../models/Event');
 
 const createEvent = async (req, res) => {
   try {
-    const { name, description, date, time, entranceType, entrancePrice  } = req.body;
+    const { 
+      name, 
+      description, 
+      date, 
+      time, 
+      endDate, 
+      endTime, 
+      entranceType, 
+      entrancePrice 
+    } = req.body;
 
-    if (!req.file || !name || !description || !date || !time || !entranceType) {
+    if (!req.file || !name || !description || !date || !time || !endDate || !endTime || !entranceType) {
       return res.status(400).json({ error: 'Все поля обязательны' });
     }
 
     if (entranceType === 'paid' && (!entrancePrice || entrancePrice < 0)) {
       return res.status(400).json({ error: 'Укажите корректную цену для платного входа' });
     }
+
+    const startDateTime = new Date(`${date}T${time}`);
+    const endDateTime = new Date(`${endDate}T${endTime}`);
+
+    if (endDateTime <= startDateTime) {
+      return res.status(400).json({ error: 'Дата и время окончания должны быть позже начала события' });
+    }
+
+    const expiresAt = endDateTime;
 
     const imagePath = `/uploads/events/${req.file.filename}`;
 
@@ -20,6 +38,9 @@ const createEvent = async (req, res) => {
       description: description.trim(),
       date: new Date(date),
       time: time.trim(),
+      endDate: new Date(endDate),
+      endTime: endTime.trim(),
+      expiresAt: expiresAt,
       entranceType: entranceType.trim(),
       ...(entranceType === 'paid' && { entrancePrice: Number(entrancePrice) }),
     });
@@ -31,6 +52,8 @@ const createEvent = async (req, res) => {
       description: event.description,
       date: event.date.toISOString().split('T')[0],
       time: event.time,
+      endDate: event.endDate.toISOString().split('T')[0],
+      endTime: event.endTime,
       entranceType: event.entranceType,
       entrancePrice: event.entrancePrice,
     });
@@ -43,22 +66,40 @@ const createEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { img, name, description, date, time, entranceType, entrancePrice  } = req.body;
+    const { 
+      img, 
+      name, 
+      description, 
+      date, 
+      time, 
+      endDate, 
+      endTime, 
+      entranceType, 
+      entrancePrice 
+    } = req.body;
 
     const imagePath = req.file ? `/uploads/events/${req.file.filename}` : img;
 
-    
     console.log('req.file:', req.file?.filename);
     console.log('req.body.img:', img);
     console.log('imagePath:', imagePath);
 
-    if (!imagePath  || !name || !description || !date || !time || !entranceType) {
+    if (!imagePath || !name || !description || !date || !time || !endDate || !endTime || !entranceType) {
       return res.status(400).json({ error: 'Все поля обязательны' });
     }
 
     if (entranceType === 'paid' && (!entrancePrice || entrancePrice < 0)) {
       return res.status(400).json({ error: 'Укажите корректную цену для платного входа' });
     }
+
+    const startDateTime = new Date(`${date}T${time}`);
+    const endDateTime = new Date(`${endDate}T${endTime}`);
+    
+    if (endDateTime <= startDateTime) {
+      return res.status(400).json({ error: 'Дата и время окончания должны быть позже начала события' });
+    }
+
+    const expiresAt = endDateTime;
 
     const updated = await Event.findByIdAndUpdate(
       id,
@@ -68,6 +109,9 @@ const updateEvent = async (req, res) => {
         description: description.trim(),
         date: new Date(date),
         time: time.trim(),
+        endDate: new Date(endDate),
+        endTime: endTime.trim(),
+        expiresAt: expiresAt,
         entranceType: entranceType.trim(),
         ...(entranceType === 'paid' && { entrancePrice: Number(entrancePrice) }),
       },
@@ -88,6 +132,8 @@ const updateEvent = async (req, res) => {
       description: updated.description,
       date: updated.date.toISOString().split('T')[0],
       time: updated.time,
+      endDate: updated.endDate.toISOString().split('T')[0],
+      endTime: updated.endTime,
       entranceType: updated.entranceType,
       entrancePrice: updated.entrancePrice,
     });
