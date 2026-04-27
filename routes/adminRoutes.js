@@ -27,6 +27,8 @@ const {
   deleteEvent
 } = require('../controllers/eventController');
 
+const { dashboardController } = require('../controllers/dashboardController');
+
 router.post('/login', async (req, res) => {
   try {
     const { login, password } = req.body;
@@ -66,8 +68,6 @@ router.get('/protected', authMiddleware, (req, res) => {
   });
 });
 
-
-// router.get('/menu', authMiddleware, getMenuItem);
 router.post('/menu', authMiddleware, createMenuItem);
 router.put('/menu/:id', authMiddleware, updateMenuItem);
 router.delete('/menu/:id', authMiddleware, deleteMenuItem);
@@ -80,6 +80,8 @@ router.delete('/categories/:id', authMiddleware, deleteCategory);
 router.post('/events', authMiddleware, uploadEventImage.single('image'), createEvent);
 router.put('/events/:id', authMiddleware, uploadEventImage.single('image'), updateEvent);
 router.delete('/events/:id', authMiddleware, deleteEvent);
+
+router.get('/dashboard', authMiddleware, dashboardController);
 
 
 module.exports = router;
