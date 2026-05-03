@@ -1,0 +1,8 @@
+node_modules
+.env
+.git
+.gitattributes
+Dockerfile
+.dockerignore
+uploads/*
+!uploads/.gitkeep

@@ -15,7 +15,7 @@ app.use('/api', require('./routes/publicRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 
 mongoose
-  .connect('mongodb://localhost:27017/defaqto_server')
+  .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/defaqto_server')
   .then(() => console.log('MongoDB connected!'))
   .catch(err => console.log('MongoDB is not connected with error:', err));
 
