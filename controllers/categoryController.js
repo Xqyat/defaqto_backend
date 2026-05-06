@@ -41,7 +41,6 @@ const createCategory = async (req, res) => {
 };
 
 const updateCategory = async (req, res) => {
-  console.log('PUT category controller сработал', req.params.id);
 
   try {
     const { id } = req.params;

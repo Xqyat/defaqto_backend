@@ -6,7 +6,7 @@ const uploadEventImage = require('../middleware/uploadEventImage');
 const Admin = require('../models/Admin');
 const authMiddleware = require('../middleware/auth');
 
-const JWT_SECRET = 'defaqto-super-secret-2026';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const {
   getCategories,
@@ -32,17 +32,10 @@ const { dashboardController } = require('../controllers/dashboardController');
 router.post('/login', async (req, res) => {
   try {
     const { login, password } = req.body;
-    console.log('Входяший LOGIN:', login);
-    console.log('Входяший PASSWORD:', password);
-
-    console.log('Все админы:', await Admin.find({}, 'login'));
 
     const admin = await Admin.findOne({ login });
-    console.log('Админ из БД:', admin ? admin.login : 'не найден');
 
     if (!admin) return res.status(401).json({ error: 'Неверный логин' });
-
-    console.log('Проверка пароля:', admin.password, '==', password);
 
     if (admin.password !== password) {
       return res.status(401).json({ error: 'Неверный пароль' });

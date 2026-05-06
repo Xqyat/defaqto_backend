@@ -2,9 +2,6 @@ const nodemailer = require('nodemailer');
 
 const sendBookingRequest = async (req, res) => {
   try {
-    console.log('MAIL_USER:', process.env.MAIL_USER);
-    console.log('MAIL_PASS:', process.env.MAIL_PASS ? '***OK***' : 'EMPTY!');
-    console.log('MAIL_TO:', process.env.MAIL_TO);
     const { name, phone, date, time, seats, privacyAccepted } = req.body;
 
     if (!name || !phone || !date || !time || !seats) {

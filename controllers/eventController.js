@@ -80,10 +80,6 @@ const updateEvent = async (req, res) => {
 
     const imagePath = req.file ? `/uploads/events/${req.file.filename}` : img;
 
-    console.log('req.file:', req.file?.filename);
-    console.log('req.body.img:', img);
-    console.log('imagePath:', imagePath);
-
     if (!imagePath || !name || !description || !date || !time || !endDate || !endTime || !entranceType) {
       return res.status(400).json({ error: 'Все поля обязательны' });
     }
