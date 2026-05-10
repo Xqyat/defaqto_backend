@@ -64,6 +64,8 @@ router.get('/events', async (req, res) => {
       description: event.description,
       date: event.date.toISOString().split('T')[0],
       time: event.time,
+      endDate: event.endDate ? event.endDate.toISOString().split('T')[0] : event.date.toISOString().split('T')[0],
+      endTime: event.endTime || event.time,
       entranceType: event.entranceType,
       entrancePrice: event.entrancePrice,
     }))
